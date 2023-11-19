@@ -1,9 +1,9 @@
 ﻿  Test.cpp
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(156,13): warning C4477: “printf”: 格式字符串“%d”需要类型“int”的参数，但可变参数 1 拥有了类型“size_t”
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(156,13): message : 请考虑在格式字符串中使用“%zd”
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(145,8): message : 在编译 类 模板 成员函数“void open_address::HashTable<std::string,int,open_address::HashFunc<std::string>>::Print(void)”时
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(222,11): message : 请参阅 "open_address::TestHT2" 中对 "open_address::HashTable<std::string,int,open_address::HashFunc<std::string>>::Print" 的第一个引用
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(207,26): message : 查看对正在编译的 类 模板 实例化“open_address::HashTable<std::string,int,open_address::HashFunc<std::string>>”的引用
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(160,13): warning C4477: “printf”: 格式字符串“%d”需要类型“int”的参数，但可变参数 1 拥有了类型“size_t”
-D:\代码仓库\DSCode\Hash手动实现\HashTable.h(160,13): message : 请考虑在格式字符串中使用“%zd”
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(159,13): warning C4477: “printf”: 格式字符串“%d”需要类型“int”的参数，但可变参数 1 拥有了类型“size_t”
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(159,13): message : 请考虑在格式字符串中使用“%zd”
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(148,8): message : 在编译 类 模板 成员函数“void open_address::HashTable<std::string,int,HashFunc<std::string>>::Print(void)”时
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(225,11): message : 请参阅 "open_address::TestHT2" 中对 "open_address::HashTable<std::string,int,HashFunc<std::string>>::Print" 的第一个引用
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(210,26): message : 查看对正在编译的 类 模板 实例化“open_address::HashTable<std::string,int,HashFunc<std::string>>”的引用
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(163,13): warning C4477: “printf”: 格式字符串“%d”需要类型“int”的参数，但可变参数 1 拥有了类型“size_t”
+D:\代码仓库\DSCode\Hash手动实现\HashTable.h(163,13): message : 请考虑在格式字符串中使用“%zd”
   Hash手动实现.vcxproj -> D:\代码仓库\DSCode\Hash手动实现\x64\Debug\Hash手动实现.exe

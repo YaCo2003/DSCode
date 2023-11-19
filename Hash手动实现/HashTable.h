@@ -1,5 +1,34 @@
 #pragma once
 
+template<class K>
+struct HashFunc//数字直接转换
+{
+	size_t operator()(const K& key)
+	{
+		return (size_t)key;
+	}
+};
+
+template<>
+struct HashFunc<string>//模板特化
+{
+	//字符串用每个字符ascii码相加
+	size_t operator()(const string& key)
+	{
+		// BKDR哈希字符串
+		//防止acb 和abc 重复
+		size_t hash = 0;
+		for (auto e : key)
+		{
+			hash *= 31;
+			hash += e;
+		}
+
+		cout << key << ":" << hash << endl;
+		return hash;
+	}
+};
+
 namespace open_address
 {
 	//hashdata状态
@@ -21,33 +50,7 @@ namespace open_address
 		Status _s;//状态
 	};
 
-	template<class K>
-	struct HashFunc//数字直接转换
-	{
-		size_t operator()(const K& key)
-		{
-			return (size_t)key;
-		}
-	};
-	template<>
-	struct HashFunc<string>//模板特化
-	{
-		//字符串用每个字符ascii码相加
-		size_t operator()(const string& key)
-		{
-			// BKDR哈希字符串
-			//防止acb 和abc 重复
-			size_t hash = 0;
-			for (auto e : key)
-			{
-				hash *= 31;
-				hash += e;
-			}
 
-			cout << key << ":" << hash << endl;
-			return hash;
-		}
-	};
 	//Hash为仿函数，用于数字转换
 	template<class K, class V,class Hash = HashFunc<K>>
 	class HashTable
@@ -246,7 +249,7 @@ namespace hash_tocket
 		{}
 	};
 
-	template<class K, class V>
+	template<class K, class V, class Hash = HashFunc<K>>
 	class HashTable
 	{
 		typedef HashNode<K, V> Node;
@@ -277,43 +280,135 @@ namespace hash_tocket
 			//扩容，负载因子最大到1
 			if (_n == _tables.size())
 			{
-				size_t newSize = _tables.size() * 2;
-				HashTable<K, V> newHT;
-				newHT._tables.resize(newSize);
+				//size_t newSize = _tables.size() * 2;
+				//HashTable<K, V> newHT;
+				//newHT._tables.resize(newSize);
+				//// 遍历旧表
+				////方法1：浪费节点，因为要创建新的节点来插入，而原来的要析构
+				//for (size_t i = 0; i < _tables.size(); i++)
+				//{
+				//	Node* cur = _tables[i];
+				//	while (cur)
+				//	{
+				//		newHT.Insert(cur->_kv);
+				//		cur = cur->_next;
+				//	}
+				//}
+				//_tables.swap(newHT._tables);
 
-				// 遍历旧表
-				//方法1：浪费节点，因为要创建新的节点来插入，而原来的要析构
+				//方法二
+				vector<Node*> newTables;
+				newTables.resize(_tables.size() * 2);
 				for (size_t i = 0; i < _tables.size(); i++)
 				{
 					Node* cur = _tables[i];
 					while (cur)
 					{
-						newHT.Insert(cur->_kv);
-						cur = cur->_next;
-					}
-				}
+						Node* next = cur->_next;
+						//重新建立映射，挪动到新表
+						size_t hashi = hf(cur->_kv.first) % newTables.size();
+						cur->_next = newTables[i];
+						newTables[i] = cur;
 
-				_tables.swap(newHT._tables);
+						cur = next;
+					}
+					_tables[i] = nullptr;
+				}
+				_tables.swap(newTables);
 			}
 			//新建节点插入
-			size_t hashi = kv.first % _tables.size();
+			size_t hashi = hf(kv.first) % _tables.size();
 			Node* newnode = new Node(kv);
 
 			//头插
 			newnode->_next = _tables[hashi];
-			_tables[hashi]->_next = newnode;
+			_tables[hashi] = newnode;
 			++_n;
 
 			return true;
 		}
 		Node* Find(const K& key)
 		{
-			//....
+			size_t hashi = hf(key) % _tables.size();
+			Node* cur = _tables[hashi];
+			while (cur)
+			{
+				if (cur->_kv.first == key)
+				{
+					return cur;
+				}
+				cur = cur->_next;
+			}
 			return NULL;
+		}
+		bool Erase(const K& key)
+		{
+			size_t hashi = hf(key) % _tables.size();
+			Node* cur = _tables[hashi];
+			Node* prev = nullptr;
+			while (cur)
+			{
+				if (cur->_kv.first == key)
+				{
+					if (prev == nullptr)
+					{
+						_tables[hashi] = cur->_next;
+					}
+					else
+					{
+						prev->_next = cur->_next;
+					}
+					delete cur;
+					return true;
+				}
+				prev = cur;
+				cur = cur->_next;
+			}
+			return false;
 		}
 	private:
 		vector<Node*> _tables;
 		size_t _n = 0;
+		Hash hf;
 
 	};
+	void TestHT1()
+	{
+		HashTable<int, int> ht;
+		int a[] = { 4,14,24,34,5,7,1,15,25,3 };
+		for (auto e : a)
+		{
+			ht.Insert(make_pair(e, e));
+		}
+		ht.Insert(make_pair(33, 33));
+		ht.Insert(make_pair(34, 34));
+
+		cout << ht.Find(34) << endl;
+		ht.Erase(34);
+		cout << ht.Find(34) << endl;
+
+	}
+	void TestHT2()
+	{
+		string arr[] = { "香蕉", "甜瓜","苹果", "西瓜", "苹果", "西瓜", "苹果", "苹果", "西瓜", "苹果", "香蕉", "苹果", "香蕉" };
+		//HashTable<string, int, HashFuncString> ht;
+		HashTable<string, int> ht;
+		for (auto& e : arr)
+		{
+			//auto ret = ht.Find(e);
+			HashNode<string, int>* ret = ht.Find(e);
+			if (ret)
+			{
+				ret->_kv.second++;
+			}
+			else
+			{
+				ht.Insert(make_pair(e, 1));
+			}
+		}
+
+		cout << ht.Find("苹果") << endl;
+		ht.Erase("苹果");
+		cout << ht.Find("苹果") << endl;
+	}
 }

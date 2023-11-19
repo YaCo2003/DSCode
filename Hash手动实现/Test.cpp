@@ -52,6 +52,8 @@ using namespace std;
 
 int main()
 {
-	open_address::TestHT2();
+	//open_address::TestHT2();
+	//hash_tocket::TestHT1();
+	hash_tocket::TestHT2();
 
 }
