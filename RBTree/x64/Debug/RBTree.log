@@ -1,7 +1,2 @@
 ﻿  RETree.cpp
-D:\代码仓库\DS\RBTree\RETree.cpp(32,22): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=int
-          ]
-  RBTree.vcxproj -> D:\代码仓库\DS\RBTree\x64\Debug\红黑树.exe
+  RBTree.vcxproj -> D:\代码仓库\DSCode\RBTree\x64\Debug\红黑树.exe
