@@ -1,6 +1,7 @@
-#pragma once
-#pragma once
+ï»¿#pragma once
 
+// set ->key
+// map ->key/value
 
 enum Colour
 {
@@ -14,7 +15,9 @@ struct RBTreeNode
 	RBTreeNode<T>* _left;
 	RBTreeNode<T>* _right;
 	RBTreeNode<T>* _parent;
+
 	T _data;
+
 	Colour _col;
 
 	RBTreeNode(const T& data)
@@ -26,108 +29,225 @@ struct RBTreeNode
 	{}
 };
 
-//class T¾ö¶¨´«ÈëµÄ¶ÔÏó£º1.key  2.key/value
-//data£º
-//¶ÔÓÚset->RBTree<K,K> _t;
-//¶ÔÓÚmap->RBTree<K, pair<K, T>> _t;
-//ËùÒÔÕâÀï½â¾ö·½°¸ÊÇÔö¼ÓÒ»¸ö·Âº¯ÊıKeyofT
-// 
-//¶ÔÓÚset->RBTree<K, K, SetKeyofT> _t;
-//¶ÔÓÚmap->RBTree<K, pair<K, T>, MapKeyofT> _t;
-template<class K, class T, class KeyofT>
+template<class T, class Ref, class Ptr>
+struct __TreeIterator
+{
+	typedef RBTreeNode<T> Node;
+	//constè¿­ä»£å™¨è¦å¢åŠ Ref å’Œ Ptr
+	typedef __TreeIterator<T, Ref, Ptr> Self;
+	Node* _node;
+
+	__TreeIterator(Node* node)
+		:_node(node)
+	{}
+
+	Ref operator*()
+	{
+		return _node->_data;
+	}
+
+	Ptr operator->()
+	{
+		return &_node->_data;
+	}
+
+	Self& operator--()
+	{
+		//é¡ºåºï¼šå³ æ ¹ å·¦
+		if (_node->_left)
+		{
+			// ä¸‹ä¸€ä¸ªå°±æ˜¯å·¦å­æ ‘çš„æœ€å³èŠ‚ç‚¹
+			Node* cur = _node->_left;
+			while (cur->_right)
+			{
+				cur = cur->_right;
+			}
+
+			_node = cur;
+		}
+		else
+		{
+			// å³å­æ ‘ æ ¹ å·¦å­æ ‘
+			// å·¦ä¸ºç©ºï¼Œæ‰¾å­©å­æ˜¯çˆ¶äº²å³çš„é‚£ä¸ªç¥–å…ˆ
+			//ä»£è¡¨è¿™ä¸€å±‚çš„å³æ ¹å·¦å·²ç»èµ°å®Œäº†ï¼Œè¦å¾€ä¸Šä¸€å±‚å»æ‰¾
+			Node* cur = _node;
+			Node* parent = cur->_parent;
+			while (parent && cur == parent->_left)
+			{
+				cur = parent;
+				parent = parent->_parent;
+			}
+
+			_node = parent;
+		}
+
+		return *this;
+	}
+
+	Self& operator++()
+	{
+		if (_node->_right)
+		{
+			// ä¸‹ä¸€ä¸ªå°±æ˜¯å³å­æ ‘çš„æœ€å·¦èŠ‚ç‚¹
+			Node* cur = _node->_right;
+			while (cur->_left)
+			{
+				cur = cur->_left;
+			}
+
+			_node = cur;
+		}
+		else
+		{
+			// å·¦å­æ ‘ æ ¹ å³å­æ ‘
+			// å³ä¸ºç©ºï¼Œæ‰¾å­©å­æ˜¯çˆ¶äº²å·¦çš„é‚£ä¸ªç¥–å…ˆ
+			//ä»£è¡¨è¿™ä¸€å±‚çš„å·¦æ ¹å³å·²ç»èµ°å®Œäº†ï¼Œè¦å¾€ä¸Šä¸€å±‚å»æ‰¾
+			Node* cur = _node;
+			Node* parent = cur->_parent;
+			while (parent && cur == parent->_right)
+			{
+				cur = parent;
+				parent = parent->_parent;
+			}
+
+			_node = parent;
+		}
+
+		return *this;
+	}
+
+	bool operator!=(const Self& s)
+	{
+		return _node != s._node;
+	}
+
+	bool operator==(const Self& s)
+	{
+		return _node == s._node;
+	}
+};
+
+// set->RBTree<K, K, SetKeyOfT> _t;
+// map->RBTree<K, pair<const K, T>, MapKeyOfT> _t;
+template<class K, class T, class KeyOfT>
 class RBTree
 {
 	typedef RBTreeNode<T> Node;
 public:
-	//²åÈë  ²åÈëĞÂ½ÚµãÍ³Ò»Îªºì
-	bool Insert(const T& data)
+	typedef __TreeIterator<T, T&, T*> iterator;
+	typedef __TreeIterator<T, const T&, const T*> const_iterator;
+
+	iterator begin()
 	{
-		//¸ù½ÚµãÎªºÚ
+		Node* cur = _root;
+		while (cur && cur->_left)
+		{
+			cur = cur->_left;
+		}
+
+		return iterator(cur);
+	}
+
+	iterator end()
+	{
+		return iterator(nullptr);
+	}
+
+	const_iterator begin() const
+	{
+		Node* cur = _root;
+		while (cur && cur->_left)
+		{
+			cur = cur->_left;
+		}
+
+		return const_iterator(cur);
+	}
+
+	const_iterator end() const
+	{
+		return const_iterator(nullptr);
+	}
+
+	//
+	/*bool Insert(const T& data)*/
+	//è¿™é‡Œè¦æƒ³å®ç°Map[i],insertè¿”å›å€¼è¦ä¿®æ”¹
+	//Map[key]/Set[key] å¦‚æœå­˜åœ¨å°±æ˜¯æŸ¥è¯¢/ä¿®æ”¹ï¼Œå¦‚æœä¸å­˜åœ¨ï¼Œå°±æ˜¯æ’å…¥
+	//pair<iterator, bool> Insert(const T& data)
+	pair<Node*, bool> Insert(const T& data)
+	{
 		if (_root == nullptr)
 		{
 			_root = new Node(data);
 			_root->_col = BLACK;
-			return true;
+			//return true;
+			return make_pair(_root, true);
 		}
 
 		Node* parent = nullptr;
 		Node* cur = _root;
-		//²»¹ÜÄã´«µÄÊÇÊ²Ã´£¬¶¨ÒåÒ»¸ökeyoft
-		//·²ÊÇ±È½Ï´óĞ¡£¬¶¼ÓÃkot´«²Î
-		KeyofT kot;
-		//Ñ°ÕÒ²åÈëÎ»ÖÃ
-		//Âú×ã¶ş²æËÑË÷Ê÷ĞÔÖÊ
+		KeyOfT kot;
+
 		while (cur)
 		{
-			//´«ÈëTºó£¬ÕâÀïÖ±½Ó±È½Ï´óĞ¡ÎŞ·¨ÅĞ¶ÏÊÇkey±È½Ï»¹ÊÇpair<key,value>±È½Ï
-			//ËùÒÔĞèÒª°ÑdataÀïµÄkeyÈ¡³öÀ´±È½Ï
-			//data==key  ->key
-			//data==pair ->key
-			//Í¨¹ıKeyofT kot; °ÑkeyÈ¡³öÀ´
-			if (kot(data) > kot(cur->_data))
+			if (kot(cur->_data) < kot(data))
 			{
 				parent = cur;
 				cur = cur->_right;
 			}
-			else if (kot(data) < kot(cur->_data))
+			else if (kot(cur->_data) > kot(data))
 			{
 				parent = cur;
 				cur = cur->_left;
 			}
+			else
+			{
+				//return false;
+				return make_pair(cur, false);
+			}
 		}
 
-		//×ßµ½ÕâÀï cur=nullptr
-		//ĞÂÔö½Úµã
+		// æ–°å¢èŠ‚ç‚¹ç»™çº¢è‰²
 		cur = new Node(data);
+		Node* newnode = cur;
 		cur->_col = RED;
-		//ÅĞ¶ÏÔÚparentµÄ×ó±ß»¹ÊÇÓÒ±ß²åÈë
-		if (kot(parent->_data) > kot(cur->_data))
-		{
-			parent->_left = cur;
-			cur->_parent = parent;
-		}
-		else
+		if (kot(parent->_data) < kot(data))
 		{
 			parent->_right = cur;
 			cur->_parent = parent;
 		}
+		else
+		{
+			parent->_left = cur;
+			cur->_parent = parent;
+		}
 
-		//²åÈëÍê³ÉºóÒª¿¼ÂÇ´ËÊ±ÊÇ·ñÆ½ºâ
-		//Çé¿ö1£¬Èç¹ûparentÎªºÚ£¬²»ÓÃ¹Ü
-		//Çé¿ö2£¬Èç¹ûparentÎªºì
 		while (parent && parent->_col == RED)
 		{
-			//´ËÊ±Òª¿¼ÂÇparentµÄÊåÊå
-			//Ò²¾ÍÊÇparent->parentµÄÁíÍâÒ»¸ö×Ó½Úµã
 			Node* grandfather = parent->_parent;
-			//´ËÊ±parent¿ÉÄÜÎª×ó£¬Ò²¿ÉÄÜÎªÓÒ
 			if (parent == grandfather->_left)
 			{
 				//     g
-				//   p    u
+				//   p   u
 				// c
 				Node* uncle = grandfather->_right;
-				//´ËÊ±ÓÖÓĞÊåÊåÁ½ÖÖÇé¿ö
-				//1.ÊåÊåÎª´æÔÚÇÒÎªºì
 				if (uncle && uncle->_col == RED)
 				{
-					//ÓÉÓÚcºÍp´ËÊ±¶¼Îªºì£¬²»Âú×ãrbtreeÌõ¼ş
-					//ËùÒÔÒª±äÉ«
+					// å˜è‰²
 					parent->_col = uncle->_col = BLACK;
 					grandfather->_col = RED;
 
-					//¼ÌĞøÍùÉÏ¸üĞÂ´¦Àí
+					// ç»§ç»­å¾€ä¸Šæ›´æ–°å¤„ç†
 					cur = grandfather;
 					parent = cur->_parent;
 				}
-				else//2.ÊåÊå²»´æÔÚ»òÕßÎªºÚ
+				else
 				{
-					//´ËÊ±curÒªÅĞ¶ÏÔÚparentµÄ×ó±ß»¹ÊÇÓÒ±ß
 					if (cur == parent->_left)
 					{
-						//ÓÒµ¥Ğı
+						// å•æ—‹
 						//     g
-						//   p    
+						//   p
 						// c
 						RotateR(grandfather);
 						parent->_col = BLACK;
@@ -135,7 +255,7 @@ public:
 					}
 					else
 					{
-						// Ë«Ğı
+						// åŒæ—‹
 						//     g
 						//   p
 						//     c
@@ -144,33 +264,31 @@ public:
 						cur->_col = BLACK;
 						grandfather->_col = RED;
 					}
+
 					break;
 				}
 			}
-			else//parentÔÚÓÒ±ß
+			else  // parent == grandfather->_right
 			{
 				//     g
 				//   u   p 
 				//          c
+				//
 				Node* uncle = grandfather->_left;
-				//1.ÊåÊåÎª´æÔÚÇÒÎªºì
 				if (uncle && uncle->_col == RED)
 				{
-					// ±äÉ«
+					// å˜è‰²
 					parent->_col = uncle->_col = BLACK;
 					grandfather->_col = RED;
 
-					// ¼ÌĞøÍùÉÏ´¦Àí
+					// ç»§ç»­å¾€ä¸Šå¤„ç†
 					cur = grandfather;
 					parent = cur->_parent;
 				}
-				else//2.ÊåÊå²»´æÔÚ»òÕßÎªºÚ
+				else
 				{
 					if (cur == parent->_right)
 					{
-						//     g
-						//   u   p 
-						//			c
 						RotateL(grandfather);
 						parent->_col = BLACK;
 						grandfather->_col = RED;
@@ -180,21 +298,31 @@ public:
 						//     g
 						//   u   p 
 						//     c
-						//Ë«Ğı±¾ÖÊ cur±ä³É¸ù
+						//
 						RotateR(parent);
 						RotateL(grandfather);
 						cur->_col = BLACK;
 						grandfather->_col = RED;
-
 					}
+
 					break;
 				}
 			}
 		}
+
 		_root->_col = BLACK;
-		return true;
+
+		//return  true;
+		return make_pair(newnode, true);
 	}
-	//×óµ¥Ğı
+
+	iterator Find(const K& key)
+	{
+		//...
+
+		return end();
+	}
+
 	void RotateL(Node* parent)
 	{
 		Node* subR = parent->_right;
@@ -203,14 +331,11 @@ public:
 		parent->_right = subRL;
 		subR->_left = parent;
 
-		//¼ÇÂ¼parentµÄparent
 		Node* parentParent = parent->_parent;
 
 		parent->_parent = subR;
-		if (subRL)//¿ÉÄÜÎª¿Õ
-		{
+		if (subRL)
 			subRL->_parent = parent;
-		}
 
 		if (_root == parent)
 		{
@@ -227,26 +352,24 @@ public:
 			{
 				parentParent->_right = subR;
 			}
+
 			subR->_parent = parentParent;
 		}
 	}
-	//ÓÒµ¥Ğı
+
 	void RotateR(Node* parent)
 	{
 		Node* subL = parent->_left;
 		Node* subLR = subL->_right;
 
 		parent->_left = subLR;
-		subL->_right = parent;
+		if (subLR)
+			subLR->_parent = parent;
 
-		//¼ÇÂ¼parentµÄparent
 		Node* parentParent = parent->_parent;
 
+		subL->_right = parent;
 		parent->_parent = subL;
-		if (subLR)//¿ÉÄÜÎª¿Õ
-		{
-			subLR->_parent = parent;
-		}
 
 		if (_root == parent)
 		{
@@ -263,82 +386,35 @@ public:
 			{
 				parentParent->_right = subL;
 			}
+
 			subL->_parent = parentParent;
 		}
 	}
-	void InOrder()
-	{
-		_InOrder(_root);
-		cout << endl;
-	}
-	//ÖĞĞò±éÀú
-	void _InOrder(Node* root)
-	{
-		if (root == nullptr)
-			return;
 
-		_InOrder(root->_left);
-		cout << root->_kv.first << " ";
-		_InOrder(root->_right);
-	}
 
-	// ¸ù½Úµã->µ±Ç°½ÚµãÕâÌõÂ·¾¶µÄºÚÉ«½ÚµãµÄÊıÁ¿
-	bool Check(Node* root, int blacknum, const int refVal)
-	{
-		if (root == nullptr)
-		{
-			//cout << balcknum << endl;
-			if (blacknum != refVal)
-			{
-				cout << "´æÔÚºÚÉ«½ÚµãÊıÁ¿²»ÏàµÈµÄÂ·¾¶" << endl;
-				return false;
-			}
 
-			return true;
-		}
+	//Node* Find(const K& key)
+	//{
+	//	Node* cur = _root;
+	//	while (cur)
+	//	{
+	//		if (cur->_kv.first < key)
+	//		{
+	//			cur = cur->_right;
+	//		}
+	//		else if (cur->_kv.first > key)
+	//		{
+	//			cur = cur->_left;
+	//		}
+	//		else
+	//		{
+	//			return cur;
+	//		}
+	//	}
 
-		if (root->_col == RED && root->_parent->_col == RED)
-		{
-			cout << "ÓĞÁ¬ĞøµÄºìÉ«½Úµã" << endl;
-
-			return false;
-		}
-
-		if (root->_col == BLACK)
-		{
-			++blacknum;
-		}
-
-		return Check(root->_left, blacknum, refVal)
-			&& Check(root->_right, blacknum, refVal);
-	}
-
-	bool IsBalance()
-	{
-		if (_root == nullptr)
-			return true;
-
-		if (_root->_col == RED)
-			return false;
-
-		//²Î¿¼Öµ
-		int refVal = 0;
-		Node* cur = _root;
-		while (cur)
-		{
-			if (cur->_col == BLACK)
-			{
-				++refVal;
-			}
-
-			cur = cur->_left;
-		}
-
-		int blacknum = 0;
-		return Check(_root, blacknum, refVal);
-	}
+	//	return NULL;
+	//}
 
 private:
 	Node* _root = nullptr;
 };
-

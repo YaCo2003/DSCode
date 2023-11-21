@@ -86,7 +86,7 @@ using namespace std;
 
 void test_set()
 {
-	MySet::set<int> s;
+	bit::set<int> s;
 	s.insert(4);
 	s.insert(1);
 	s.insert(2);
@@ -96,61 +96,64 @@ void test_set()
 	s.insert(10);
 	s.insert(5);
 
-	//MySet::set<int>::iterator it = s.begin();
-	//while (it != s.end())
-	//{
-	//	*it += 1;
 
-	//	cout << *it << " ";
-	//	++it;
-	//}
-	//cout << endl;
+	bit::set<int>::iterator it = s.begin();
+	while (it != s.end())
+	{
+		//*it += 1;
+		cout << *it << " ";
+		++it;
+		//--it;
+	}
+	cout << endl;
 
-	//// key޸
-	//it = s.begin();
+	//// key
+	it = s.begin();
+	++it;
+	cout << *it << " " << endl;
 	//*it = 100;
 
-	//for (auto e : s)
-	//{
-	//	cout << e << " ";
-	//}
-	//cout << endl;
+	for (auto e : s)
+	{
+		cout << e << " ";
+	}
+	cout << endl;
 }
 
 void test_map()
 {
-	MyMap::map<string, string> dict;
-	dict.insert(make_pair("sort", ""));
+	bit::map<string, string> dict;
+	dict.insert(make_pair("sort", "排序"));
 	dict.insert(make_pair("sort", "xx"));
-	dict.insert(make_pair("left", ""));
-	dict.insert(make_pair("right", "ұ"));
+	dict.insert(make_pair("left", "左"));
+	dict.insert(make_pair("right", "右"));
 
-	//MyMap::map<string, string>::iterator it = dict.begin();
-	//while (it != dict.end())
-	//{
-	//	// key޸
-	//	it->first += 'x';
-	//	it->second += 'y';
+	bit::map<string, string>::iterator it = dict.begin();
+	while (it != dict.end())
+	{
+		// key޸
+		//it->first += 'x';
+		it->second += 'y';
+		cout << it->first << ":" << it->second << endl;
+		++it;
+	}
+	cout << endl;
 
-	//	cout << it->first << ":" << it->second << endl;
-	//	++it;
-	//}
-	//cout << endl;
+	//次数统计：
+	string arr[] = { "香蕉", "甜瓜","苹果", "西瓜", "苹果", "西瓜", "苹果", "苹果", "西瓜", "苹果", "香蕉", "苹果", "香蕉" };
+	bit::map<string, int> countmap;
+	for (auto& e : arr)
+	{
+		countmap[e]++;
+	}
 
-	//string arr[] = { "㽶", "","ƻ", "", "ƻ", "", "ƻ", "ƻ", "", "ƻ", "㽶", "ƻ", "㽶" };
-	//MyMap::map<string, int> countMap;
-	//for (auto& e : arr)
-	//{
-	//	countMap[e]++;
-	//}
+	for (auto& kv : countmap)
+	{
+		cout << kv.first << ":" << kv.second << endl;
+	}
 
-	//for (auto& kv : countMap)
-	//{
-	//	cout << kv.first << ":" << kv.second << endl;
-	//}
-	//cout << endl;
+	cout << endl;
 }
-
 int main()
 {
 	test_map();
